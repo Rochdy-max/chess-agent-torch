@@ -1,2 +1,2 @@
 # chess-agent-torch
-Trainig project to understand the basics of neural networks.
+Training project to understand the basics of neural networks.
