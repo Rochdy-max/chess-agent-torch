@@ -1,25 +1,30 @@
 import numpy as np
 
 class NeuronsLayer:
-    def __init__(self, length: int, prev_length: int) -> None:
+    """
+        Provides an encapsulation for a layer in a neural network
+    """
+
+    def __init__(self, size: int, prev_size: int) -> None:
         """
-            Initialize the weigths matrix and biases vector for this layer.
+            Initialize the size, weigths matrix and biases vector for this layer.
 
             Each line from the weights matrix contains the weigths of the
-            synapses binding the 'prev_length' neurons of the preceding layer
+            synapses binding the 'prev_size' neurons of the preceding layer
             to a single neuron of the current layer.
 
-            For the 'length' lines of this matrix (one binding each neuron to
-            those of the previous layer) there are 'prev_length' columns. This
-            is a "length x prev_length" matrix intialized to random values at this time.
+            For the 'size' lines of this matrix (one binding each neuron to
+            those of the previous layer) there are 'prev_size' columns. This
+            is a "size x prev_size" matrix intialized to random values at this time.
             
-            The biases vector also has 'length' lines and each express a value
+            The biases vector also has 'size' lines and each express a value
             to add to the weigthed sum of the previous layer's neurons' activations
             considering the treshold from which this sum should be to activate
             the neuron. At the time, this vector contains only zeros.
         """
-        self.weigths = np.random.randn(length, prev_length)
-        self.biases = np.zeros(length)
+        self.size = size
+        self.weigths = np.random.randn(size, prev_size)
+        self.biases = np.zeros(size)
 
     def activation(self, z: np.ndarray) -> np.ndarray:
         """
