@@ -18,10 +18,30 @@ class NeuralNetwork:
             
     
     def forward_prop(self, X: np.ndarray) -> np.ndarray:
-        pass
+        """
+            Applies forward propagation on an input matrix 'X' with lines
+            for the activation values of this network input layer's neurons.
+            
+            Each column of this matrix should correspond to an example.
+            
+            The returned matrix 'y_hat' contains the has the same architecture.
+            Each line is bound to a neuron of the last layer and the
+            columns are bound to examples.
+        """
+        invalid_input_size_error_msg = "The input matrix 'X' should have the same number of lines as the number of neurons of the network's first layer"        
+
+        if X.shape[0] != self.layers[0].shape[1]:
+            error_details = f"Number of lines in X ({X.shape[0]}) != Number of neurons in input layer ({self.layers[0].shape[1]})"
+            raise ValueError(invalid_input_size_error_msg, error_details)
+
+        A = X
+        for layer in self.layers:
+            A = layer.process(A)
+        # The last layer activation matrix (A) is also y_hat
+        return A
 
     def compute_cost(y: np.ndarray, y_hat: np.ndarray) -> float:
-        pass
-            
+        pass            
+    
     def back_prop(self, y: np.ndarray) -> None:
         pass
