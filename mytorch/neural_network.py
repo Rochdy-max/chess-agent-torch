@@ -41,7 +41,29 @@ class NeuralNetwork:
         return A
 
     def compute_cost(y: np.ndarray, y_hat: np.ndarray) -> float:
-        pass            
+        """
+            Cost function determining the accuracy of a neural network.
+            It uses the Cross Entropy Loss function.
+
+            J = -SUM(T * log(S))
+            
+            S := A prediction (or approximation) from y_hat
+            T := The corresponding expected target from y
+        """
+        distinct_matrices_shape_error_msg = "y and y_hat should have the same shape"
+        sum_val = 0
+
+        if y.shape != y_hat.shape:
+            error_details = f"{y.shape} != {y_hat.shape}"
+            raise ValueError(distinct_matrices_shape_error_msg, error_details)
+
+        # For each example (column which is now row in transposed matrix),
+        # add result of the computation S * log(T) to the total_sum
+        for s, t in zip(y.T, y_hat.T):
+            sum_val += np.dot(s, np.log(t))
+
+        return -sum_val
+            
     
     def back_prop(self, y: np.ndarray) -> None:
         pass
