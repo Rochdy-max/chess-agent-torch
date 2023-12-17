@@ -1,8 +1,8 @@
 import numpy as np
 
-class NeuronsLayer:
+class IntersynapticSpace:
     """
-        Provides an encapsulation for a layer in a neural network
+        Provides an encapsulation for the data involved between two layers in a neural network
     """
 
     def __init__(self, size: int, prev_size: int) -> None:
@@ -25,6 +25,8 @@ class NeuronsLayer:
         self.size = size
         self.weigths = np.random.randn(size, prev_size)
         self.biases = np.zeros(size)
+        self.X = None
+        self.A = None
 
     def activation(self, z: np.ndarray) -> np.ndarray:
         """
@@ -37,7 +39,7 @@ class NeuronsLayer:
         """
         return np.max(np.zeros(z.shape), z)
     
-    def process(self, X) -> np.ndarray:
+    def process(self, X: np.ndarray) -> np.ndarray:
         """
             Process the input matrix 'X' to determine the activations for the
             layer's neurons and return a matrix containing these activations.
@@ -46,13 +48,18 @@ class NeuronsLayer:
             before passing it to the activation function which will compute
             the neurons' activation as suggested.
             
-            'z' and the resulting matrix 'y_hat' will have the same number of
+            'z' and the returned matrix 'A' will have the same number of
             columns as 'X', each corresponding to an example. The number
             of lines will be the same as the number of layer's neurons (which
             is also the number of lines in the weights matrix).
             
-            z = w.X + b
-            y_hat = activation(z)
+            z := w * X + b
+            A := activation(z)
         """
+        if self.weights.shape[1] != X.shape[0]:
+            raise ValueError(f"The number of features ({X.shape[0]}) doesn't match the valid input size ({self.weigths.shape[1]})")
+
         z = np.dot(self.weigths, X) + self.biases
-        return self.activation(z)
+        self.X = X
+        self.A = self.activation(z)
+        return self.A
