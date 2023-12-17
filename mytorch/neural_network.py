@@ -1,5 +1,6 @@
 import numpy as np
 from intersynaptic_space import IntersynapticSpace
+from mytorch.utils import array_map
 
 class NeuralNetwork:
     """
@@ -60,8 +61,25 @@ class NeuralNetwork:
 
         return -sum_val
 
-    def back_prop(self, y: np.ndarray) -> np.ndarray:
-        pass
+    def back_prop(self, y: np.ndarray) -> dict[str, np.ndarray]:
+        y_hat = self.interspaces[-1].A.T
+        dA = 0 # derivative of the cost function
+        dz = array_map(lambda x: float(x > 0), y_hat) # derivative of the activation funtion (ReLU) | 1 if x is positive, 0 either
+        grads_W = list()
+        grads_b = list()
+
+        for interspace in reversed(self.interspaces):
+            sigma = np.dot(dA, dz) # S = dA*dz
+
+            dW = np.dot(sigma, interspace.X.T) # dW = S*X.T
+            grads_W.append(dW)
+            db = sigma # db = S
+            grads_b.append(db)
+
+            dA = np.dot(interspace.weights.T, sigma) # prev_dA = W.T*S
+            dz = array_map(lambda x: float(x > 0), interspace.X) # prev_dZ | 1 if x is positive, 0 either, for x in X
+            
+        return dict(('weights', grads_W), ('biases', grads_b))
 
     def apply_gradient_descent(self, dW: np.ndarray, db: np.ndarray) -> None:
         pass
