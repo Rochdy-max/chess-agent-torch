@@ -1,4 +1,5 @@
 import numpy as np
+from utils import array_map
 
 class IntersynapticSpace:
     """
@@ -37,7 +38,7 @@ class IntersynapticSpace:
             There can be many activations for each neuron if there are multiple
             examples. One column correspond to one example.
         """
-        return np.max(np.zeros(z.shape), z)
+        return array_map(lambda x: max(0, x), z)
     
     def process(self, X: np.ndarray) -> np.ndarray:
         """
