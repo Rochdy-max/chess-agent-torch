@@ -1,6 +1,6 @@
 import numpy as np
 from intersynaptic_space import IntersynapticSpace
-from mytorch.utils import array_map
+from utils import array_map
 
 class NeuralNetwork:
     """
@@ -30,8 +30,8 @@ class NeuralNetwork:
         """
         A = X.T # Using the transposition of X for computation
 
-        if A.shape[0] != self.interspaces[0].shape[1]:
-            raise ValueError(f"Number of features in X ({X.shape[1]}) isn't equal to number of neurons in neural network's input layer ({self.interspaces[0].shape[1]})")
+        if A.shape[0] != self.interspaces[0].weights.shape[1]:
+            raise ValueError(f"Number of features in X ({X.shape[1]}) isn't equal to number of neurons in neural network's input layer ({self.interspaces[0].weights.shape[1]})")
 
         for interspace in self.interspaces:
             A = interspace.process(A)
@@ -45,44 +45,47 @@ class NeuralNetwork:
             It uses the Cross Entropy Loss function, typically serving
             multi-class and multi-label classifications.
 
-            J = -SUM(T * log(S))
+            J = -SUM(T * S)
             
-            S := A prediction (or approximation) from y_hat
-            T := The corresponding expected target from y
+            T := The expected target from y
+            S := The corresponding prediction (or approximation) from y_hat
         """
         sum_val = 0
 
         if y.shape != y_hat.shape:
             raise ValueError(f"y and y_hat should have the same shape ({y.shape} != {y_hat.shape})")
 
-        # For each example, add result of the computation S * log(T) to the total_sum
-        for s, t in zip(y, y_hat):
-            sum_val += np.dot(s, np.log(t))
+        # For each example, add result of the computation S*T to the total_sum
+        for t, s in zip(y, y_hat):
+            sum_val += np.dot(t, s)
 
         return -sum_val
 
     def back_prop(self, y: np.ndarray) -> dict[str, np.ndarray]:
-        y_hat = self.interspaces[-1].A.T
-        dA = 0 # derivative of the cost function
-        dz = array_map(lambda x: float(x > 0), y_hat) # derivative of the activation funtion (ReLU) | 1 if x is positive, 0 either
+        dA = y.T # derivative of the cost function
+        dz = array_map(lambda x: float(x > 0), self.interspaces[-1].A) * dA # derivative of the activation funtion (ReLU) * dA
         grads_W = list()
         grads_b = list()
 
         for interspace in reversed(self.interspaces):
-            sigma = np.dot(dA, dz) # S = dA*dz
-
-            dW = np.dot(sigma, interspace.X.T) # dW = S*X.T
+            dW = np.dot(dz, interspace.X.T) # dW = dz . T(X)
             grads_W.append(dW)
-            db = sigma # db = S
+            db = dz # db = dz * 1
             grads_b.append(db)
 
-            dA = np.dot(interspace.weights.T, sigma) # prev_dA = W.T*S
-            dz = array_map(lambda x: float(x > 0), interspace.X) # prev_dZ | 1 if x is positive, 0 either, for x in X
+            dA = np.dot(interspace.weights.T, dz) # prev_dA = T(W) . dz
+            dz = array_map(lambda x: float(x > 0), interspace.X) * dA # prev_dZ
             
-        return dict(('weights', grads_W), ('biases', grads_b))
+        return dict([
+            ('weights', grads_W),
+            ('biases', grads_b)
+        ])
 
-    def apply_gradient_descent(self, dW: np.ndarray, db: np.ndarray) -> None:
-        pass
+    def apply_gradient_descent(self, learning_rate: float, dW: list[np.ndarray], db: list[np.ndarray]) -> None:
+        for i in range(len(self.interspaces)):
+            # Last In First Out for the gradients
+            self.interspaces[i].weights -= learning_rate * dW.pop()
+            self.interspaces[i].biases -= learning_rate * db.pop()
 
 def test_compute_cost():
     z = np.zeros((4, 5))
