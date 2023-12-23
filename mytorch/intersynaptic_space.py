@@ -24,8 +24,8 @@ class IntersynapticSpace:
             the neuron. At the time, this vector contains only zeros.
         """
         self.size = size
-        self.weigths = np.random.randn(size, prev_size)
-        self.biases = np.zeros(size)
+        self.weights = np.random.randn(size, prev_size)
+        self.biases = np.zeros((size, 1))
         self.X = None
         self.A = None
 
@@ -58,9 +58,9 @@ class IntersynapticSpace:
             A := activation(z)
         """
         if self.weights.shape[1] != X.shape[0]:
-            raise ValueError(f"The number of features ({X.shape[0]}) doesn't match the valid input size ({self.weigths.shape[1]})")
+            raise ValueError(f"The number of features ({X.shape[0]}) doesn't match the valid input size ({self.weights.shape[1]})")
 
-        z = np.dot(self.weigths, X) + self.biases
+        z = np.dot(self.weights, X) + self.biases
         self.X = X
         self.A = self.activation(z)
         return self.A
