@@ -26,19 +26,6 @@ class IntersynapticSpace:
         self.size = size
         self.weights = np.random.randn(size, prev_size)
         self.biases = np.zeros((size, 1))
-        self.X = None
-        self.A = None
-
-    def activation(self, z: np.ndarray) -> np.ndarray:
-        """
-            ReLU function applied to the weighted sum matrix ('z') to determine
-            activations for the layer's neurons and return a matrix containing
-            these activations.
-            
-            There can be many activations for each neuron if there are multiple
-            examples. One column correspond to one example.
-        """
-        return array_map(lambda x: max(0, x), z)
     
     def process(self, X: np.ndarray) -> np.ndarray:
         """
@@ -61,6 +48,4 @@ class IntersynapticSpace:
             raise ValueError(f"The number of features ({X.shape[0]}) doesn't match the valid input size ({self.weights.shape[1]})")
 
         z = np.dot(self.weights, X) + self.biases
-        self.X = X
-        self.A = self.activation(z)
-        return self.A
+        return z

@@ -1,5 +1,7 @@
 import numpy as np
 from intersynaptic_space import IntersynapticSpace
+from activation_derivatives import ActivationDerivatives
+from activation_functions import ActivationFunctions
 from utils import array_map
 
 class NeuralNetwork:
@@ -16,6 +18,10 @@ class NeuralNetwork:
         self.interspaces = list()
         for i in range(1, self.interspaces_count):
             self.interspaces.append(IntersynapticSpace(sizes[i], sizes[i - 1]))
+        self.cache = dict([
+            ("A", list()),
+            ("z", list())
+        ])
 
     def forward_prop(self, X: np.ndarray) -> np.ndarray:
         """
@@ -33,8 +39,13 @@ class NeuralNetwork:
         if A.shape[0] != self.interspaces[0].weights.shape[1]:
             raise ValueError(f"Number of features in X ({X.shape[1]}) isn't equal to number of neurons in neural network's input layer ({self.interspaces[0].weights.shape[1]})")
 
+        self.cache["z"] = []
+        self.cache["A"] = [A]
         for interspace in self.interspaces:
-            A = interspace.process(A)
+            z = interspace.process(A)
+            self.cache["z"].append(z)
+            A = ActivationFunctions.relu(z)
+            self.cache["A"].append(A)
 
         # The last layer activation matrix (A) is equal to the transposition of y_hat
         return A.T
@@ -61,21 +72,21 @@ class NeuralNetwork:
 
         return -sum_val
 
-    def back_prop(self, y: np.ndarray) -> dict[str, np.ndarray]:
+    def back_prop(self, y: np.ndarray) -> dict[str, list]:
         dA = y.T # derivative of the cost function
-        dz = array_map(lambda x: float(x > 0), self.interspaces[-1].A) * dA # derivative of the activation funtion (ReLU) * dA
         grads_W = list()
         grads_b = list()
+        i = -1 # index for A cache
 
         for interspace in reversed(self.interspaces):
-            dW = np.dot(dz, interspace.X.T) # dW = dz . T(X)
+            dz = ActivationDerivatives.relu_prime(self.cache["z"][i]) * dA # derivative of the activation funtion (ReLU) * dA
+            dW = np.dot(dz, self.cache["A"][i - 1].T) # dW = dz . T(A_prev)
             grads_W.append(dW)
             db = dz # db = dz * 1
             grads_b.append(db)
-
             dA = np.dot(interspace.weights.T, dz) # prev_dA = T(W) . dz
-            dz = array_map(lambda x: float(x > 0), interspace.X) * dA # prev_dZ
-            
+            i -= 1
+        
         return dict([
             ('weights', grads_W),
             ('biases', grads_b)
@@ -84,8 +95,8 @@ class NeuralNetwork:
     def apply_gradient_descent(self, learning_rate: float, dW: list[np.ndarray], db: list[np.ndarray]) -> None:
         for i in range(len(self.interspaces)):
             # Last In First Out for the gradients
-            self.interspaces[i].weights -= learning_rate * dW.pop()
-            self.interspaces[i].biases -= learning_rate * db.pop()
+            self.interspaces[i].weights = self.interspaces[i].weights - (learning_rate * dW.pop())
+            self.interspaces[i].biases = self.interspaces[i].biases - (learning_rate * db.pop())
 
 def test_compute_cost():
     z = np.zeros((4, 5))
