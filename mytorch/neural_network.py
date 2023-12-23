@@ -115,5 +115,21 @@ def test_compute_cost():
     except ValueError:
         print("Not same shape")
 
+def test_neural_network():
+    nn = NeuralNetwork(3, 4, 2)
+    X = np.array([[4, 3, 1]])
+    y = np.array([[1, 2]])
+    epochs = 10
+
+    for _ in range(epochs):
+        y_hat = nn.forward_prop(X)
+        print(f"{y_hat=}")
+        cost = NeuralNetwork.compute_cost(y, y_hat)
+        print(f"{cost=}")
+        grads = nn.back_prop(y)
+        nn.apply_gradient_descent(1, grads['weights'], grads['biases'])
+    
+
 if __name__ == "__main__":
-    test_compute_cost()
+    # test_compute_cost()
+    test_neural_network()
