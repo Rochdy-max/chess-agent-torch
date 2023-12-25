@@ -2,7 +2,6 @@ import numpy as np
 from intersynaptic_space import IntersynapticSpace
 from activation_derivatives import ActivationDerivatives
 from activation_functions import ActivationFunctions
-from utils import array_map
 
 class NeuralNetwork:
     """
@@ -44,7 +43,7 @@ class NeuralNetwork:
         for interspace in self.interspaces:
             z = interspace.process(A)
             self.cache["z"].append(z)
-            A = ActivationFunctions.relu(z)
+            A = ActivationFunctions.sigmoid(z)
             self.cache["A"].append(A)
 
         # The last layer activation matrix (A) is equal to the transposition of y_hat
@@ -79,7 +78,7 @@ class NeuralNetwork:
         i = -1 # index for A cache
 
         for interspace in reversed(self.interspaces):
-            dz = ActivationDerivatives.relu_prime(self.cache["z"][i]) * dA # derivative of the activation funtion (ReLU) * dA
+            dz = ActivationDerivatives.sigmoid_prime(self.cache["z"][i]) * dA # derivative of the activation funtion (ReLU) * dA
             dW = np.dot(dz, self.cache["A"][i - 1].T) # dW = dz . T(A_prev)
             grads_W.append(dW)
             db = dz # db = dz * 1

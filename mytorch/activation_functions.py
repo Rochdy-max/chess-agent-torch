@@ -15,3 +15,11 @@ class ActivationFunctions:
             f(x) = max(0, x)
         """
         return array_map(lambda x: max(0, x), z)
+
+    def sigmoid(z: np.ndarray) -> np.ndarray:
+        """
+            Sigmoid function
+            
+            f(x) = 1 / (1 + exp(-z))
+        """
+        return 1 / (1 + np.exp(-z))
