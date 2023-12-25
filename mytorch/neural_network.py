@@ -33,7 +33,7 @@ class NeuralNetwork:
             Each column is bound to a neuron of the last layer and the
             columns are bound to examples.
         """
-        A = X.T # Using the transposition of X for computation
+        A = np.atleast_2d(X).T # Using the transposition of X for computation
 
         if A.shape[0] != self.interspaces[0].weights.shape[1]:
             raise ValueError(f"Number of features in X ({X.shape[1]}) isn't equal to number of neurons in neural network's input layer ({self.interspaces[0].weights.shape[1]})")
@@ -62,6 +62,8 @@ class NeuralNetwork:
         """
         sum_val = 0
 
+        y = np.atleast_2d(y)
+        y_hat = np.atleast_2d(y_hat)
         if y.shape != y_hat.shape:
             raise ValueError(f"y and y_hat should have the same shape ({y.shape} != {y_hat.shape})")
 
@@ -72,10 +74,10 @@ class NeuralNetwork:
         return -sum_val
 
     def back_prop(self, y: np.ndarray) -> dict[str, list]:
-        dA = -y.T # derivative of the cost function
+        dA = -np.atleast_2d(y).T # derivative of the cost function
         grads_W = list()
         grads_b = list()
-        i = -1 # index for A cache
+        i = -1 # start from the end of the cache
 
         for interspace in reversed(self.interspaces):
             dz = ActivationDerivatives.sigmoid_prime(self.cache["z"][i]) * dA # derivative of the activation funtion (ReLU) * dA
@@ -127,8 +129,8 @@ def test_compute_cost():
 
 def test_neural_network():
     nn = NeuralNetwork(3, 4, 2)
-    X = np.array([[4, 3, 1]])
-    y = np.array([[1, 2]])
+    X = np.array([4, 3, 1])
+    y = np.array([1, 2])
     epochs = 10
 
     for _ in range(epochs):
