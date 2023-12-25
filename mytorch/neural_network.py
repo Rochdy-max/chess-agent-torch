@@ -72,7 +72,7 @@ class NeuralNetwork:
         return -sum_val
 
     def back_prop(self, y: np.ndarray) -> dict[str, list]:
-        dA = y.T # derivative of the cost function
+        dA = -y.T # derivative of the cost function
         grads_W = list()
         grads_b = list()
         i = -1 # index for A cache
