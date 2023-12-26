@@ -1,24 +1,39 @@
 import numpy as np
-from activation_functions import ActivationFunctions
+from activation_functions import ActivationFunctionsFactory
 from utils import array_map
 
-class ActivationDerivatives:
+class ActivationDerivativesFactory:
     """
-        Provide derivatives of the activation functions for the implementation of back propagation
+    Provide derivatives of activation functions for the implementation of back propagation
     """
 
-    def relu_prime(z: np.ndarray):
+    @staticmethod
+    def deliver(fname: str):
         """
-            Derivative of the ReLU activation function
+        Return a function from its identifier
+        """
+        match fname:
+            case "relu":
+                return ActivationDerivativesFactory._relu_prime
+            case "sigmoid":
+                return ActivationDerivativesFactory._sigmoid_prime
+            case _:
+                raise ValueError(f"Unknown activation function: {fname}")
+
+    @staticmethod
+    def _relu_prime(z: np.ndarray):
+        """
+        Derivative of the ReLU activation function
             
-            f'(x) = 1 if the value is positive and 0 either
+        f'(x) = 1 if the value is positive and 0 either
         """
         return array_map(lambda x: float(x > 0), z)
     
-    def sigmoid_prime(z: np.ndarray) -> np.ndarray:
+    @staticmethod
+    def _sigmoid_prime(z: np.ndarray) -> np.ndarray:
         """
-            Derivative of the sigmoid activation function
+        Derivative of the sigmoid activation function
             
-            f'(x) = f(x) * (1 - f(x))
+        f'(x) = f(x) * (1 - f(x))
         """
-        return ActivationFunctions.sigmoid(z) * (1 - ActivationFunctions.sigmoid(z))
+        return ActivationFunctionsFactory._sigmoid(z) * (1 - ActivationFunctionsFactory._sigmoid(z))
