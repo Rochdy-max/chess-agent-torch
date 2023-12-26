@@ -1,6 +1,9 @@
 import numpy as np
 
 def array_map(f, arr: np.ndarray) -> np.ndarray:
+    """
+    Apply function 'f' to every deepest elements of arr and return the resulting array
+    """
     res = list()
     for x in arr:
         if type(x) == np.ndarray:
